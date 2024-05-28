@@ -5,7 +5,7 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    dockerImage = docker.build("your-docker-image-name")
+                    dockerImage = docker.build("edit.jpg")
                 }
             }
         }
