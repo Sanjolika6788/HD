@@ -2,47 +2,57 @@ pipeline {
     agent any
 
     stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/Sanjolika6788/HD.git'
+            }
+        }
         stage('Build') {
             steps {
                 script {
-                    sh 'mvn clean install'
+                    // Example for a Maven project on Windows
+                    bat 'mvn clean install'
                 }
             }
         }
         stage('Test') {
             steps {
                 script {
-                    sh 'mvn test'
+                    // Example for running JUnit tests on Windows
+                    bat 'mvn test'
                 }
             }
         }
         stage('Code Quality') {
             steps {
                 script {
-                    sh 'mvn sonar:sonar'
+                    // Example for running SonarQube analysis on Windows
+                    bat 'mvn sonar:sonar'
                 }
             }
         }
         stage('Deploy to Staging') {
             steps {
                 script {
-                    sh 'docker build -t my-app .'
-                    sh 'docker run -d -p 8080:8080 my-app'
+                    // Example for Docker on Windows
+                    bat 'docker build -t my-app .'
+                    bat 'docker run -d -p 8080:8080 my-app'
                 }
             }
         }
         stage('Release to Production') {
             steps {
                 script {
-                    sh 'aws deploy create-deployment --application-name my-app --deployment-group my-deployment-group --s3-location bucket=my-bucket,key=my-app.zip,bundleType=zip'
+                    // Example for AWS CodeDeploy on Windows
+                    bat 'aws deploy create-deployment --application-name my-app --deployment-group my-deployment-group --s3-location bucket=my-bucket,key=my-app.zip,bundleType=zip'
                 }
             }
         }
         stage('Monitor') {
             steps {
                 script {
-                    // Example for Datadog
-                    sh 'datadog-agent status'
+                    // Example for Datadog on Windows
+                    bat 'datadog-agent status'
                 }
             }
         }
