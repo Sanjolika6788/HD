@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    tools {
-        maven 'Maven 3.8.1' // Ensure this matches the name you gave in the Maven configuration
-    }
-
     stages {
         stage('Checkout') {
             steps {
@@ -14,43 +10,55 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    bat 'mvn clean install'
+                    docker.image('maven:3.8.1').inside {
+                        sh 'mvn clean install'
+                    }
                 }
             }
         }
         stage('Test') {
             steps {
                 script {
-                    bat 'mvn test'
+                    docker.image('maven:3.8.1').inside {
+                        sh 'mvn test'
+                    }
                 }
             }
         }
         stage('Code Quality') {
             steps {
                 script {
-                    bat 'mvn sonar:sonar'
+                    docker.image('maven:3.8.1').inside {
+                        sh 'mvn sonar:sonar'
+                    }
                 }
             }
         }
         stage('Deploy to Staging') {
             steps {
                 script {
-                    bat 'docker build -t my-app .'
-                    bat 'docker run -d -p 8080:8080 my-app'
+                    docker.image('docker:20.10').inside {
+                        sh 'docker build -t my-app .'
+                        sh 'docker run -d -p 8080:8080 my-app'
+                    }
                 }
             }
         }
         stage('Release to Production') {
             steps {
                 script {
-                    bat 'aws deploy create-deployment --application-name my-app --deployment-group my-deployment-group --s3-location bucket=my-bucket,key=my-app.zip,bundleType=zip'
+                    docker.image('amazon/aws-cli').inside {
+                        sh 'aws deploy create-deployment --application-name my-app --deployment-group my-deployment-group --s3-location bucket=my-bucket,key=my-app.zip,bundleType=zip'
+                    }
                 }
             }
         }
         stage('Monitor') {
             steps {
                 script {
-                    bat 'datadog-agent status'
+                    docker.image('datadog/agent:latest').inside {
+                        sh 'datadog-agent status'
+                    }
                 }
             }
         }
