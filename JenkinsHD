@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    tools {
-        maven 'maven 3.9.7' // Ensure this matches the name you gave in the Maven configuration
-    }
-
     stages {
         stage('Checkout') {
             steps {
@@ -14,28 +10,28 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    bat 'mvn clean install'
+                    bat 'mvn -f C:/ProgramData/Jenkins/.jenkins/workspace/hd/pom.xml clean install'
                 }
             }
         }
         stage('Test') {
             steps {
                 script {
-                    bat 'mvn test'
+                    bat 'mvn -f C:/ProgramData/Jenkins/.jenkins/workspace/hd/pom.xml test'
                 }
             }
         }
         stage('Code Quality') {
             steps {
                 script {
-                    bat 'mvn sonar:sonar'
+                    bat 'mvn -f C:/ProgramData/Jenkins/.jenkins/workspace/hd/pom.xml sonar:sonar'
                 }
             }
         }
         stage('Deploy to Staging') {
             steps {
                 script {
-                    bat 'docker build -t my-app .'
+                    bat 'docker build -t my-app C:/ProgramData/Jenkins/.jenkins/workspace/hd'
                     bat 'docker run -d -p 8080:8080 my-app'
                 }
             }
