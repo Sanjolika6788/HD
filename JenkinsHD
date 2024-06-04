@@ -1,66 +1,77 @@
 pipeline {
     agent any
 
+    environment {
+        NODEJS_HOME = tool name: 'NodeJS' // Adjust this to your NodeJS tool configuration
+        PATH = "${NODEJS_HOME}/bin:${env.PATH}"
+    }
+
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/Sanjolika6788/HD.git'
+                git 'https://github.com/your-username/your-repo.git' // Replace with your repository URL
             }
         }
+
         stage('Build') {
             steps {
                 script {
-                    docker.image('maven:3.8.1').inside {
-                        sh 'mvn clean install'
-                    }
+                    sh 'npm install'
+                    sh 'npm run build'
                 }
             }
         }
+
         stage('Test') {
             steps {
                 script {
-                    docker.image('maven:3.8.1').inside {
-                        sh 'mvn test'
-                    }
+                    sh 'npm test'
                 }
+                junit '**/test-results/*.xml'
             }
         }
-        stage('Code Quality') {
+
+        stage('Code Quality Analysis') {
             steps {
                 script {
-                    docker.image('maven:3.8.1').inside {
-                        sh 'mvn sonar:sonar'
+                    withSonarQubeEnv('SonarQube') { // Configure SonarQube in Jenkins
+                        sh 'sonar-scanner'
                     }
                 }
             }
         }
+
         stage('Deploy to Staging') {
             steps {
                 script {
-                    docker.image('docker:20.10').inside {
-                        sh 'docker build -t my-app .'
-                        sh 'docker run -d -p 8080:8080 my-app'
-                    }
+                    sh 'docker build -t your-app:staging .'
+                    sh 'docker run -d -p 8080:8080 your-app:staging'
                 }
             }
         }
+
         stage('Release to Production') {
             steps {
                 script {
-                    docker.image('amazon/aws-cli').inside {
-                        sh 'aws deploy create-deployment --application-name my-app --deployment-group my-deployment-group --s3-location bucket=my-bucket,key=my-app.zip,bundleType=zip'
-                    }
+                    // Assuming AWS CodeDeploy or similar tool
+                    sh 'aws deploy create-deployment --application-name your-app --deployment-group-name your-deployment-group --revision revisionType=S3,bucket=bucketName,key=keyName'
                 }
             }
         }
-        stage('Monitor') {
+
+        stage('Monitoring and Alerting') {
             steps {
                 script {
-                    docker.image('datadog/agent:latest').inside {
-                        sh 'datadog-agent status'
-                    }
+                    // Configure Datadog or New Relic
+                    sh 'curl -X POST "https://api.datadoghq.com/api/v1/monitor" -H "Content-Type: application/json" -d \'{"type": "metric alert", "query": "avg(last_5m):sum:system.net.bytes_rcvd{host:host0} > 100"}\''
                 }
             }
+        }
+    }
+
+    post {
+        always {
+            cleanWs()
         }
     }
 }
