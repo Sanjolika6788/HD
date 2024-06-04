@@ -2,14 +2,14 @@ pipeline {
     agent any
 
     environment {
-        NODEJS_HOME = tool name: 'NodeJS' // Adjust this to your NodeJS tool configuration
+        NODEJS_HOME = tool name: 'NodeJS 14' // Adjust this to match the name configured in Jenkins
         PATH = "${NODEJS_HOME}/bin:${env.PATH}"
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/your-username/your-repo.git' // Replace with your repository URL
+                git 'https://github.com/Sanjolika6788/HD.git'
             }
         }
 
@@ -34,7 +34,7 @@ pipeline {
         stage('Code Quality Analysis') {
             steps {
                 script {
-                    withSonarQubeEnv('SonarQube') { // Configure SonarQube in Jenkins
+                    withSonarQubeEnv('SonarQube') { // Ensure SonarQube is configured in Jenkins
                         sh 'sonar-scanner'
                     }
                 }
